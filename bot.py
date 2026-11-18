@@ -5,30 +5,61 @@ from aiogram.filters import CommandStart
 from aiogram.types import WebAppInfo, InlineKeyboardMarkup, InlineKeyboardButton
 
 BOT_TOKEN = os.getenv(9015244243:AAFIwANFKYG5IJs52ZjKCwAJ0Hf9m0HO9AU)
-WEB_APP_URL = "https://beyyhanii-sudo.github.io/ton-mining-bot/"
+WEB_APP_URL = "https://github.io"
 
-bot = Bot(token=BOT_TOKEN)
-dp = Dispatcher()
+import os
+import json
+from aiogram import Bot, Dispatcher, types
+from aiogram.types import WebAppInfo, InlineKeyboardMarkup, InlineKeyboardButton
+from aiohttp import web
 
-@dp.message(CommandStart())
-async def start_cmd(message: types.Message):
-    keyboard = InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(
-            text="⛏️ Kazıma Başla", 
-            web_app=WebAppInfo(url=WEB_APP_URL)
-        )]
-    ])
-    await message.answer(
-        "🚀 *TON Cloud Mining'e Hoş Geldin!*\n\n"
-        "• İlk aşama *Ücretsiz CPU* ile hemen kazıma başla.\n"
-        "• TON cüzdanını bağlayarak CPU seviyeni kademeli yükselt ve kazım hızını katla!",
-        parse_mode="Markdown",
-        reply_markup=keyboard
+# Konfigürasyon kontrolü
+TOKEN = os.getenv("9015244243:AAFIwANFKYG5IJs52ZjKCwAJ0Hf9m0HO9AU")
+WEBAPP_URL = os.getenv("WEBAPP_URL", "https://beyyhanii-sudo.github.io/ton-mining-bot/")
+
+bot = Bot(token=TOKEN)
+dp = Dispatcher(bot=bot)
+
+@dp.message_handler(commands=["start"])
+async def cmd_start(message: types.Message):
+    args = message.get_args()  # Örn: ref_12345 parametresini yakalar
+    user_id = message.from_user.id
+    
+    # Kullanıcı referansla geldiyse burada veritabanına kaydedebilirsin
+    if args:
+        print(f"Kullanıcı {user_id}, {args} referans kodu ile katıldı.")
+
+    keyboard = InlineKeyboardMarkup().add(
+        InlineKeyboardButton(
+            text="⛏️ Madencilik Konsolunu Aç",
+            web_app=WebAppInfo(url=WEBAPP_URL)
+        )
     )
+    
+    welcome_text = (
+        f"👑 **TON Cloud Mining Pro**'ya hoş geldin!\n\n"
+        f"🆔 Telegram ID: `{user_id}`\n"
+        f"⚡ Bulut tabanlı kazım motoruna bağlanmak için aşağıdaki butona tıkla."
+    )
+    await message.answer(welcome_text, parse_mode="Markdown", reply_markup=keyboard)
+
+async def handle_ping(request):
+    return web.Response(text="Bot aktif ve çalışıyor!")
 
 async def main():
-    print("Bot çalışıyor...")
-    await dp.start_polling(bot)
+    app = web.Application()
+    app.router.add_get("/", handle_ping)
+    
+    port = int(os.environ.get("PORT", 8080))
+    runner = web.AppRunner(app)
+    await runner.setup()
+    site = web.TCPSite(runner, "0.0.0.0", port)
+    await site.start()
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    import asyncio
+    loop = asyncio.get_event_loop()
+    loop.create_task(main())
+    
+    from aiogram import executor
+    executor.start_polling(dp, skip_updates=True)
