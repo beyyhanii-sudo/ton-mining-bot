@@ -5,27 +5,27 @@ from aiogram.filters import CommandStart
 from aiogram.types import WebAppInfo, InlineKeyboardMarkup, InlineKeyboardButton
 
 BOT_TOKEN = os.getenv(9015244243:AAFIwANFKYG5IJs52ZjKCwAJ0Hf9m0HO9AU)
-WEB_APP_URL = "https://github.io"
-
 import os
-import json
+import asyncio
 from aiogram import Bot, Dispatcher, types
 from aiogram.types import WebAppInfo, InlineKeyboardMarkup, InlineKeyboardButton
 from aiohttp import web
 
-# Konfigürasyon kontrolü
+# Render Environment Variables (BOT_TOKEN) üzerinden güvenli okuma
 TOKEN = os.getenv("9015244243:AAFIwANFKYG5IJs52ZjKCwAJ0Hf9m0HO9AU")
 WEBAPP_URL = os.getenv("WEBAPP_URL", "https://beyyhanii-sudo.github.io/ton-mining-bot/")
+
+if not TOKEN:
+    raise ValueError("BOT_TOKEN çevresel değişkeni bulunamadı! Render panelinden ekleyin.")
 
 bot = Bot(token=TOKEN)
 dp = Dispatcher(bot=bot)
 
 @dp.message_handler(commands=["start"])
 async def cmd_start(message: types.Message):
-    args = message.get_args()  # Örn: ref_12345 parametresini yakalar
+    args = message.get_args()  # Referans kodunu yakalar (örn: ref_12345)
     user_id = message.from_user.id
     
-    # Kullanıcı referansla geldiyse burada veritabanına kaydedebilirsin
     if args:
         print(f"Kullanıcı {user_id}, {args} referans kodu ile katıldı.")
 
@@ -43,6 +43,7 @@ async def cmd_start(message: types.Message):
     )
     await message.answer(welcome_text, parse_mode="Markdown", reply_markup=keyboard)
 
+# Render Web Service Health Check Endpoint
 async def handle_ping(request):
     return web.Response(text="Bot aktif ve çalışıyor!")
 
@@ -57,7 +58,6 @@ async def main():
     await site.start()
 
 if __name__ == "__main__":
-    import asyncio
     loop = asyncio.get_event_loop()
     loop.create_task(main())
     
