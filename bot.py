@@ -5,7 +5,7 @@ from aiogram.filters import CommandStart
 from aiogram.types import WebAppInfo, InlineKeyboardMarkup, InlineKeyboardButton
 
 BOT_TOKEN = os.getenv(9015244243:AAFIwANFKYG5IJs52ZjKCwAJ0Hf9m0HO9AU)
-WEB_APP_URL = "https://github.io"
+WEB_APP_URL = "https://beyyhanii-sudo.github.io/ton-mining-bot/"
 
 bot = Bot(token=BOT_TOKEN)
 dp = Dispatcher()
