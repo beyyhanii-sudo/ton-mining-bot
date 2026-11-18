@@ -1,36 +1,540 @@
 <!DOCTYPE html>
-<html lang="tr">
+<html lang="tr" class="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>TON Cloud Mining Pro</title>
+    <title>TON CLOUD MINING PRO | Enterprise Node Infrastructure</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <style>
-        :root {
-            --bg-dark: #09090b;
-            --card-bg: #141418;
-            --gold-primary: #f5c542;
-            --gold-light: #ffe082;
-            --gold-glow: rgba(245, 197, 66, 0.35);
-            --text-main: #ffffff;
-            --text-muted: #8e8e93;
-            --border-subtle: rgba(245, 197, 66, 0.18);
-            --danger: #ff3b5c;
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        obsidian: '#060913',
+                        surface: '#0D1324',
+                        panel: '#121A31',
+                        ton: { DEFAULT: '#0098EA', glow: '#00E5FF', dark: '#00669E' },
+                        gold: { DEFAULT: '#F59E0B', light: '#FCD34D', dark: '#B45309' }
+                    },
+                    animation: {
+                        'spin-slow': 'spin 18s linear infinite',
+                        'spin-reverse': 'spin 12s linear infinite reverse',
+                        'pulse-glow': 'pulseGlow 3s ease-in-out infinite',
+                    },
+                    keyframes: {
+                        pulseGlow: {
+                            '0%, 100%': { opacity: '0.6', transform: 'scale(1)' },
+                            '50%': { opacity: '1', transform: 'scale(1.04)' },
+                        }
+                    }
+                }
+            }
         }
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; -webkit-tap-highlight-color: transparent; user-select: none; }
-        body { background-color: var(--bg-dark); background-image: radial-gradient(circle at 50% 15%, rgba(245, 197, 66, 0.12) 0%, transparent 55%); color: var(--text-main); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
-        .top-bar { display: flex; justify-content: space-between; align-items: center; padding: 14px 18px; border-bottom: 1px solid rgba(255, 255, 255, 0.06); background: rgba(12, 12, 15, 0.85); backdrop-filter: blur(10px); }
-        .user-pill { display: flex; align-items: center; gap: 8px; background: var(--card-bg); padding: 6px 12px; border-radius: 20px; border: 1px solid var(--border-subtle); font-size: 13px; font-weight: 600; }
-        .wallet-btn { background: linear-gradient(135deg, #f5c542, #d49b1a); color: #000; border: none; padding: 7px 14px; border-radius: 20px; font-size: 12px; font-weight: 700; cursor: pointer; box-shadow: 0 0 12px var(--gold-glow); }
-        .content { flex: 1; overflow-y: auto; padding: 18px 18px 110px 18px; }
-        .tab-section { display: none; animation: fadeIn 0.25s ease; }
-        .tab-section.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
-        .balance-header { text-align: center; margin-top: 8px; margin-bottom: 20px; }
-        .balance-label { font-size: 12px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; }
-        .balance-amount { font-size: 36px; font-weight: 800; margin-top: 4px; background: linear-gradient(180deg, #fff 20%, var(--gold-primary) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .hashrate-badge { display: inline-flex; align-items: center; gap: 6px; margin-top: 8px; background: rgba(245, 197, 66, 0.12); border: 1px solid var(--border-subtle); color: var(--gold-light); padding: 5px 14px; border-radius: 99px; font-size: 13px; font-weight: 600; }
-        .miner-orb-wrapper { display: flex; justify-content: center; align-items: center; margin: 22px 0; position: relative; }
-        .miner-orb { width: 190px; height: 190px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #2a2416, #0d0d10 75%); border: 2px solid var(--gold-primary); box-shadow: 0 0 35px var(--gold-glow), inset 0 0 25px rgba(245, 197, 66, 0.25); display: flex; flex-direction: column; justify-content: center; align-items: center; cursor: pointer; transition: transform 0.08s ease; }
-        .miner-orb:active { transform: scale(0.95); }
-        .orb-icon { font-size: 48px; filter: drop-shadow(0 0 12px var(--
+    </script>
+
+    <style>
+        * { -webkit-tap-highlight-color: transparent; user-select: none; box-sizing: border-box; }
+        body { background-color: #03050A; color: #F8FAFC; font-family: 'Inter', sans-serif; overflow-x: hidden; margin: 0; padding: 0; }
+        ::-webkit-scrollbar { width: 4px; height: 4px; }
+        ::-webkit-scrollbar-track { background: #060913; }
+        ::-webkit-scrollbar-thumb { background: #1E293B; border-radius: 9999px; }
+        .glass-card { background: linear-gradient(145deg, rgba(18, 26, 49, 0.85) 0%, rgba(10, 15, 30, 0.92) 100%); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.07); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.45); }
+        .glass-card-ton { background: linear-gradient(145deg, rgba(0, 152, 234, 0.14) 0%, rgba(10, 15, 30, 0.94) 100%); backdrop-filter: blur(16px); border: 1px solid rgba(0, 229, 255, 0.25); box-shadow: 0 0 25px rgba(0, 152, 234, 0.15); }
+        .glass-card-gold { background: linear-gradient(145deg, rgba(245, 158, 11, 0.14) 0%, rgba(10, 15, 30, 0.94) 100%); backdrop-filter: blur(16px); border: 1px solid rgba(245, 158, 11, 0.28); box-shadow: 0 0 25px rgba(245, 158, 11, 0.12); }
+        .reactor-core { background: radial-gradient(circle at 35% 35%, #38BDF8 0%, #0098EA 45%, #032B44 85%, #020617 100%); box-shadow: 0 0 40px rgba(0, 152, 234, 0.55), inset 0 0 25px rgba(255, 255, 255, 0.4); transition: transform 0.08s cubic-bezier(0.22, 1, 0.36, 1); }
+        .reactor-core:active { transform: scale(0.93); }
+        .reactor-overheated { background: radial-gradient(circle at 35% 35%, #FCA5A5 0%, #EF4444 45%, #7F1D1D 85%, #020617 100%) !important; box-shadow: 0 0 50px rgba(239, 68, 68, 0.7) !important; }
+        @keyframes floatUpFade { 0% { opacity: 1; transform: translate(-50%, 0) scale(0.85); } 100% { opacity: 0; transform: translate(-50%, -75px) scale(1.2); } }
+        .tap-particle { position: absolute; pointer-events: none; animation: floatUpFade 0.85s cubic-bezier(0.16, 1, 0.3, 1) forwards; font-family: 'JetBrains Mono', monospace; font-weight: 700; z-index: 40; }
+        .cyber-grid { background-image: linear-gradient(to right, rgba(0, 152, 234, 0.04) 1px, transparent 1px), linear-gradient(to bottom, rgba(0, 152, 234, 0.04) 1px, transparent 1px); background-size: 28px 28px; }
+        .tab-panel { display: none; animation: panelFadeIn 0.28s cubic-bezier(0.16, 1, 0.3, 1); }
+        .tab-panel.active { display: block; }
+        @keyframes panelFadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+        input { user-select: text; -webkit-user-select: text; }
+    </style>
+</head>
+<body class="min-h-screen flex justify-center bg-[#03050A]">
+
+    <div id="app-shell" class="w-full max-w-[480px] min-h-screen bg-obsidian cyber-grid relative flex flex-col border-x border-slate-800/60 shadow-2xl overflow-hidden">
+
+        <!-- Top Status Header -->
+        <header class="sticky top-0 z-30 px-4 pt-3 pb-2.5 bg-obsidian/85 backdrop-blur-xl border-b border-slate-800/80 flex items-center justify-between">
+            <div class="flex items-center gap-2.5">
+                <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-ton to-blue-700 p-[1px] shadow-lg shadow-ton/20">
+                    <div class="w-full h-full bg-obsidian rounded-[11px] flex items-center justify-center">
+                        <svg class="w-5 h-5 text-ton-glow" viewBox="0 0 24 24" fill="none">
+                            <path d="M12 2L3 7.5L12 22L21 7.5L12 2Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+                            <path d="M12 22V10M12 10L3 7.5M12 10L21 7.5" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+                        </svg>
+                    </div>
+                </div>
+                <div>
+                    <div class="flex items-center gap-1.5">
+                        <h1 class="text-sm font-extrabold tracking-tight text-white">TON CLOUD <span class="text-ton-glow">PRO</span></h1>
+                        <span class="px-1.5 py-0.5 text-[9px] font-mono font-bold uppercase rounded bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">NODE v4.2</span>
+                    </div>
+                    <p id="header-user-tag" class="text-[11px] text-slate-400 font-mono truncate max-w-[165px]">@node_operator</p>
+                </div>
+            </div>
+
+            <button onclick="switchTab('withdraw')" class="glass-card-ton px-3 py-1.5 rounded-xl flex items-center gap-2 active:scale-95 transition">
+                <div class="text-right">
+                    <div class="text-[9px] uppercase tracking-wider text-slate-400 font-semibold">Cüzdan Bakiyesi</div>
+                    <div class="text-xs font-mono font-bold text-white flex items-center justify-end gap-1">
+                        <span id="header-balance">0.0000</span>
+                        <span class="text-ton-glow text-[10px]">TON</span>
+                    </div>
+                </div>
+                <div class="w-6 h-6 rounded-lg bg-ton/20 flex items-center justify-center text-ton-glow">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
+                </div>
+            </button>
+        </header>
+
+        <div id="toast-container" class="fixed top-16 left-1/2 -translate-x-1/2 z-50 w-[92%] max-w-[440px] pointer-events-none flex flex-col gap-2"></div>
+
+        <!-- MAIN CONTENT -->
+        <main class="flex-1 overflow-y-auto px-4 pt-3 pb-28 space-y-4">
+
+            <!-- 1. MINING -->
+            <section id="tab-mining" class="tab-panel active space-y-4">
+                <div class="grid grid-cols-3 gap-2">
+                    <div class="glass-card p-2.5 rounded-2xl">
+                        <div class="text-[10px] text-slate-400">Hash Gücü</div>
+                        <div id="stat-hashrate" class="text-xs font-mono font-bold text-ton-glow mt-0.5">125.0 H/s</div>
+                        <div class="text-[9px] text-emerald-400 font-mono mt-0.5">+%100 Aktif</div>
+                    </div>
+                    <div class="glass-card p-2.5 rounded-2xl">
+                        <div class="text-[10px] text-slate-400">Günlük Tahmin</div>
+                        <div id="stat-daily-yield" class="text-xs font-mono font-bold text-white mt-0.5">0.4320 TON</div>
+                        <div id="stat-hourly-yield" class="text-[9px] text-slate-400 font-mono mt-0.5">0.0180/sa</div>
+                    </div>
+                    <div class="glass-card p-2.5 rounded-2xl">
+                        <div class="text-[10px] text-slate-400">Donanım Sınıfı</div>
+                        <div id="stat-tier-badge" class="text-xs font-bold text-gold-light mt-0.5 truncate">Tier 1 Node</div>
+                        <div id="stat-efficiency" class="text-[9px] text-slate-400 font-mono mt-0.5">Verim: %94</div>
+                    </div>
+                </div>
+
+                <div class="glass-card-ton p-4 rounded-3xl relative overflow-hidden">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-[11px] font-semibold uppercase tracking-wider text-ton-glow">Biriken Blok Ödülü</span>
+                        <span id="block-height-tag" class="text-[10px] font-mono text-slate-400">Blok #48,912,404</span>
+                    </div>
+                    <div class="flex items-end justify-between gap-3">
+                        <div>
+                            <div class="flex items-baseline gap-1.5">
+                                <span id="unclaimed-amount" class="text-3xl font-mono font-extrabold tracking-tight text-white">0.000000</span>
+                                <span class="text-sm font-mono font-bold text-ton-glow">TON</span>
+                            </div>
+                            <div id="unclaimed-usd" class="text-[11px] font-mono text-slate-400 mt-0.5">≈ $0.0000 USD</div>
+                        </div>
+                        <button onclick="claimMinedTokens()" class="px-4 py-3 rounded-2xl bg-gradient-to-r from-ton to-cyan-500 text-slate-950 font-extrabold text-xs uppercase tracking-wide shadow-lg shadow-ton/30 active:scale-95 transition flex items-center gap-1.5 shrink-0">
+                            Cüzdana Aktar
+                        </button>
+                    </div>
+                    <div class="mt-3">
+                        <div class="flex justify-between text-[10px] font-mono text-slate-400 mb-1">
+                            <span>Blok Doğrulama Döngüsü</span>
+                            <span id="block-progress-pct">0%</span>
+                        </div>
+                        <div class="w-full h-1.5 bg-slate-900 rounded-full overflow-hidden">
+                            <div id="block-progress-bar" class="h-full bg-gradient-to-r from-ton to-ton-glow rounded-full transition-all duration-300" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="glass-card p-5 rounded-3xl flex flex-col items-center relative overflow-hidden">
+                    <div class="w-full flex items-center justify-between mb-3 z-10">
+                        <div class="flex items-center gap-1.5">
+                            <span id="thermal-dot" class="w-2 h-2 rounded-full bg-emerald-400"></span>
+                            <span class="text-[11px] font-semibold text-slate-300">Çekirdek Sıcaklığı</span>
+                        </div>
+                        <span id="thermal-text" class="text-xs font-mono font-bold text-emerald-400">34°C (%0)</span>
+                    </div>
+                    <div class="w-full h-2 bg-slate-900 rounded-full overflow-hidden mb-5 border border-slate-800 z-10">
+                        <div id="thermal-bar" class="h-full bg-gradient-to-r from-emerald-400 via-amber-400 to-rose-500 transition-all duration-150" style="width: 0%"></div>
+                    </div>
+                    <div id="overheat-banner" class="hidden w-full mb-3 px-3 py-2 rounded-xl bg-rose-500/20 border border-rose-500/40 text-center z-10">
+                        <p class="text-xs font-bold text-rose-300">⚠️ TERMAL LİMİT AŞILDI! Soğutma Devrede...</p>
+                        <p id="cooldown-timer" class="text-[11px] font-mono text-rose-200">Kalan Süre: 10.0 sn</p>
+                    </div>
+                    <div id="reactor-container" class="relative w-48 h-48 flex items-center justify-center my-1">
+                        <button id="reactor-orb" onclick="handleReactorTap(event)" class="reactor-core w-32 h-32 rounded-full flex flex-col items-center justify-center relative z-20 cursor-pointer focus:outline-none">
+                            <svg class="w-10 h-10 text-white drop-shadow-md mb-1" viewBox="0 0 24 24" fill="none">
+                                <path d="M12 2L3 7.5L12 22L21 7.5L12 2Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+                            </svg>
+                            <span class="text-[10px] font-mono font-extrabold uppercase tracking-widest text-white/95">BOOST TAP</span>
+                            <span id="tap-power-label" class="text-[9px] font-mono text-cyan-100/90">+0.00015 TON</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="glass-card p-4 rounded-3xl">
+                    <div class="flex items-center justify-between mb-2">
+                        <h3 class="text-xs font-bold text-white">Canlı Ağ Telemetrisi & Hash Hızı</h3>
+                    </div>
+                    <div class="w-full h-24 relative">
+                        <canvas id="telemetry-canvas" class="w-full h-full block"></canvas>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 2. HARDWARE -->
+            <section id="tab-hardware" class="tab-panel space-y-4">
+                <div class="glass-card-gold p-4 rounded-3xl flex items-center justify-between">
+                    <div>
+                        <span class="text-[10px] font-mono uppercase tracking-wider text-gold-light font-bold">Bulut Veri Merkezi</span>
+                        <h2 class="text-base font-extrabold text-white mt-0.5">Donanım & Node Yükseltme</h2>
+                    </div>
+                </div>
+                <div id="hardware-list" class="space-y-3"></div>
+            </section>
+
+            <!-- 3. DEPOSIT -->
+            <section id="tab-deposit" class="tab-panel space-y-4">
+                <div class="glass-card-ton p-4 rounded-3xl">
+                    <div class="flex items-center justify-between mb-3">
+                        <div>
+                            <span class="text-[10px] font-mono uppercase tracking-wider text-ton-glow font-bold">TON Mainnet</span>
+                            <h2 class="text-base font-extrabold text-white">Bakiye Yatır (Deposit)</h2>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-5 gap-1.5 mb-3">
+                        <button onclick="selectDepositPreset(1)" class="preset-btn py-2 rounded-xl bg-slate-900 border border-slate-700 text-xs font-mono font-bold text-white">1</button>
+                        <button onclick="selectDepositPreset(5)" class="preset-btn py-2 rounded-xl bg-slate-900 border border-slate-700 text-xs font-mono font-bold text-white">5</button>
+                        <button onclick="selectDepositPreset(10)" class="preset-btn py-2 rounded-xl bg-ton/20 border border-ton text-xs font-mono font-bold text-ton-glow">10</button>
+                        <button onclick="selectDepositPreset(25)" class="preset-btn py-2 rounded-xl bg-slate-900 border border-slate-700 text-xs font-mono font-bold text-white">25</button>
+                        <button onclick="selectDepositPreset(50)" class="preset-btn py-2 rounded-xl bg-slate-900 border border-slate-700 text-xs font-mono font-bold text-white">50</button>
+                    </div>
+                    <div class="relative mb-3">
+                        <input id="deposit-amount-input" type="number" step="0.1" min="0.5" value="10" class="w-full bg-slate-950/90 border border-slate-700/90 rounded-2xl px-4 py-3 text-sm font-mono font-bold text-white focus:outline-none focus:border-ton">
+                        <span class="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-mono font-bold text-ton-glow">TON</span>
+                    </div>
+                    <button id="btn-simulate-deposit" onclick="simulateBlockchainDeposit()" class="w-full py-3.5 rounded-2xl bg-gradient-to-r from-ton to-blue-600 text-white font-extrabold text-xs uppercase tracking-wider shadow-lg shadow-ton/25 active:scale-[0.99] transition">
+                        Transferi Doğrula & Bakiyeye Ekle
+                    </button>
+                </div>
+            </section>
+
+            <!-- 4. WITHDRAW -->
+            <section id="tab-withdraw" class="tab-panel space-y-4">
+                <div class="glass-card p-4 rounded-3xl border border-amber-500/30 relative overflow-hidden">
+                    <div class="flex items-center justify-between mb-2">
+                        <div class="flex items-center gap-2">
+                            <div class="w-8 h-8 rounded-xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-amber-400">🔒</div>
+                            <div>
+                                <h2 class="text-sm font-extrabold text-white">Çekim Protokolü & Alt Limit</h2>
+                                <p class="text-[10px] text-slate-400">Anti-Bot & Likidite Koruması</p>
+                            </div>
+                        </div>
+                        <span id="withdraw-eligibility-badge" class="px-2 py-1 rounded-lg bg-amber-500/15 text-amber-400 font-mono text-[10px] font-bold">KİLİTLİ</span>
+                    </div>
+                    <div class="mt-3 bg-slate-950/70 p-3 rounded-2xl border border-slate-800/90">
+                        <div class="flex justify-between items-baseline mb-1.5">
+                            <span class="text-[11px] font-semibold text-slate-300">Minimum Çekim Eşiği</span>
+                            <span class="text-xs font-mono font-bold text-white"><span id="withdraw-progress-val" class="text-ton-glow">0.0000</span> / 15.0000 TON</span>
+                        </div>
+                        <div class="w-full h-2.5 bg-slate-900 rounded-full overflow-hidden p-[1px]">
+                            <div id="withdraw-progress-bar" class="h-full bg-gradient-to-r from-amber-500 via-ton to-emerald-400 rounded-full transition-all duration-500" style="width: 0%"></div>
+                        </div>
+                    </div>
+                    <div class="mt-3 space-y-2">
+                        <div id="cond-balance" class="flex items-center justify-between text-xs p-2 rounded-xl bg-slate-900/70 border border-slate-800"></div>
+                        <div id="cond-hardware" class="flex items-center justify-between text-xs p-2 rounded-xl bg-slate-900/70 border border-slate-800"></div>
+                        <div id="cond-referrals" class="flex items-center justify-between text-xs p-2 rounded-xl bg-slate-900/70 border border-slate-800"></div>
+                    </div>
+                </div>
+
+                <div class="glass-card p-4 rounded-3xl space-y-3">
+                    <h3 class="text-xs font-extrabold uppercase tracking-wider text-white">TON Cüzdanına Çekim Talebi</h3>
+                    <input id="withdraw-address" type="text" placeholder="UQ..." class="w-full bg-slate-950/90 border border-slate-700/90 rounded-2xl px-3.5 py-2.5 text-xs font-mono text-white focus:outline-none focus:border-ton">
+                    <div class="grid grid-cols-2 gap-2.5">
+                        <input id="withdraw-amount" type="number" step="0.1" min="15" placeholder="15.00" oninput="updateWithdrawSummary()" class="w-full bg-slate-950/90 border border-slate-700/90 rounded-2xl px-3.5 py-2.5 text-xs font-mono font-bold text-white">
+                        <input id="withdraw-memo" type="text" placeholder="Memo (Opsiyonel)" class="w-full bg-slate-950/90 border border-slate-700/90 rounded-2xl px-3.5 py-2.5 text-xs font-mono text-white">
+                    </div>
+                    <button onclick="processWithdrawal()" class="w-full py-3.5 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-600 text-slate-950 font-extrabold text-xs uppercase tracking-wider shadow-lg active:scale-[0.99] transition">
+                        Çekim Emrini Yayınla
+                    </button>
+                </div>
+            </section>
+
+            <!-- 5. REFERRALS (Test butonu kaldırıldı) -->
+            <section id="tab-referrals" class="tab-panel space-y-4">
+                <div class="glass-card-ton p-4 rounded-3xl relative overflow-hidden">
+                    <span class="px-2 py-0.5 rounded-md bg-ton/20 text-ton-glow font-mono text-[10px] font-bold">2 KATMANLI ORTAKLIK</span>
+                    <h2 class="text-base font-extrabold text-white mt-1.5">Referans & Ağ Matrisi</h2>
+                    <p class="text-xs text-slate-300 mt-1">Davet ettiğin aktif madencilerden ömür boyu komisyon kazan.</p>
+                </div>
+
+                <div class="glass-card p-4 rounded-3xl space-y-3">
+                    <label class="block text-[11px] font-bold text-slate-300">Kişisel Davet Bağlantın</label>
+                    <div class="flex items-center gap-2">
+                        <input id="referral-link-input" type="text" readonly value="https://t.me/toncloudminer_tr_bot?start=ref_884920" class="flex-1 bg-slate-950 border border-slate-700 rounded-xl px-3 py-2.5 text-xs font-mono text-ton-glow focus:outline-none">
+                        <button onclick="copyReferralLink()" class="px-4 py-2.5 rounded-xl bg-ton text-slate-950 font-extrabold text-xs shrink-0 active:scale-95 transition">Kopyala</button>
+                    </div>
+                </div>
+
+                <div class="glass-card p-4 rounded-3xl">
+                    <div class="flex items-center justify-between mb-3">
+                        <h3 class="text-xs font-extrabold uppercase tracking-wider text-white">Ağındaki Madenciler (<span id="ref-count-header">0</span>)</h3>
+                        <span class="text-xs font-mono font-bold text-emerald-400">Kazanç: <span id="ref-earnings-total">0.0000</span> TON</span>
+                    </div>
+                    <div id="referral-list" class="space-y-2"></div>
+                </div>
+            </section>
+
+            <!-- 6. MENU -->
+            <section id="tab-menu" class="tab-panel space-y-4">
+                <div class="glass-card p-4 rounded-3xl flex items-center gap-3.5">
+                    <div class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-ton via-blue-600 to-gold p-[2px] shrink-0">
+                        <div class="w-full h-full rounded-[14px] bg-slate-950 flex items-center justify-center text-lg font-extrabold text-white" id="profile-avatar-initials">OP</div>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-center gap-2">
+                            <h2 id="profile-fullname" class="text-base font-extrabold text-white truncate">Node Operatörü</h2>
+                            <span class="px-1.5 py-0.5 rounded bg-ton/20 text-ton-glow font-mono text-[9px] font-bold">PRO</span>
+                        </div>
+                        <p id="profile-tg-id" class="text-xs font-mono text-slate-400 mt-0.5">TG ID: 849201942</p>
+                    </div>
+                </div>
+
+                <div class="glass-card-ton p-4 rounded-3xl flex items-center justify-between gap-3">
+                    <div>
+                        <div class="text-xs font-extrabold text-white">TON Connect 2.0 Cüzdanı</div>
+                        <div id="connected-wallet-status" class="text-[11px] font-mono text-slate-300 mt-0.5">Bağlı Cüzdan Yok</div>
+                    </div>
+                    <button id="btn-ton-connect" onclick="toggleTonConnect()" class="px-3.5 py-2.5 rounded-xl bg-ton text-slate-950 font-extrabold text-xs shrink-0 active:scale-95 transition">Cüzdan Bağla</button>
+                </div>
+            </section>
+        </main>
+
+        <!-- BOTTOM NAVIGATION -->
+        <nav class="fixed bottom-0 w-full max-w-[480px] z-30 bg-obsidian/92 backdrop-blur-2xl border-t border-slate-800/90 px-1.5 py-2">
+            <div class="grid grid-cols-6 gap-1">
+                <button onclick="switchTab('mining')" data-nav="mining" class="nav-btn active flex flex-col items-center justify-center py-1.5 rounded-xl text-ton-glow bg-ton/15 transition">
+                    <span class="text-[10px] font-bold">Kazım</span>
+                </button>
+                <button onclick="switchTab('hardware')" data-nav="hardware" class="nav-btn flex flex-col items-center justify-center py-1.5 rounded-xl text-slate-400 transition">
+                    <span class="text-[10px] font-semibold">Donanım</span>
+                </button>
+                <button onclick="switchTab('deposit')" data-nav="deposit" class="nav-btn flex flex-col items-center justify-center py-1.5 rounded-xl text-slate-400 transition">
+                    <span class="text-[10px] font-semibold">Yatırım</span>
+                </button>
+                <button onclick="switchTab('withdraw')" data-nav="withdraw" class="nav-btn flex flex-col items-center justify-center py-1.5 rounded-xl text-slate-400 transition">
+                    <span class="text-[10px] font-semibold">Çekim</span>
+                </button>
+                <button onclick="switchTab('referrals')" data-nav="referrals" class="nav-btn flex flex-col items-center justify-center py-1.5 rounded-xl text-slate-400 transition">
+                    <span class="text-[10px] font-semibold">Referans</span>
+                </button>
+                <button onclick="switchTab('menu')" data-nav="menu" class="nav-btn flex flex-col items-center justify-center py-1.5 rounded-xl text-slate-400 transition">
+                    <span class="text-[10px] font-semibold">Menü</span>
+                </button>
+            </div>
+        </nav>
+    </div>
+
+    <script>
+        const HARDWARE_CATALOG = [
+            { id: 'tier1', tier: 1, name: 'Başlangıç Node CPU', baseHash: 125, baseYieldPerSec: 0.000005, baseCost: 0.50, costMultiplier: 1.45, thermalDamping: 1.0, powerWatts: '65W', maxLevel: 10 },
+            { id: 'tier2', tier: 2, name: 'Quantum Core v2', baseHash: 850, baseYieldPerSec: 0.000028, baseCost: 2.50, costMultiplier: 1.50, thermalDamping: 0.78, powerWatts: '180W', maxLevel: 10 },
+            { id: 'tier3', tier: 3, name: 'Liquid-Cooled ASIC Rig', baseHash: 4200, baseYieldPerSec: 0.000115, baseCost: 8.00, costMultiplier: 1.55, thermalDamping: 0.55, powerWatts: '620W', maxLevel: 10 }
+        ];
+
+        const STORAGE_KEY = 'ton_cloud_mining_pro_state_v2';
+        let state = loadState();
+
+        function loadState() {
+            try {
+                const raw = localStorage.getItem(STORAGE_KEY);
+                return raw ? JSON.parse(raw) : {
+                    balance: 0.25, unclaimed: 0.01, staked: 0,
+                    hardwareLevels: { tier1: 1, tier2: 0, tier3: 0 },
+                    heat: 0, isOverheated: false, cooldownRemaining: 0,
+                    blockProgress: 15, blockHeight: 48912404,
+                    referrals: [], referralEarnings: 0, walletAddress: null,
+                    transactions: [], settings: { sound: true, haptic: true },
+                    telemetryHistory: [120, 124, 122, 128, 125, 131]
+                };
+            } catch (e) { return {}; }
+        }
+
+        function saveState() { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+
+        function showToast(msg, type = 'info') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `px-4 py-3 rounded-2xl border backdrop-blur-xl shadow-xl text-xs font-semibold bg-slate-900/95 border-ton/50 text-cyan-100`;
+            toast.textContent = msg;
+            container.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-panel').forEach(el => el.classList.remove('active'));
+            document.getElementById(`tab-${tabName}`).classList.add('active');
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                if (btn.getAttribute('data-nav') === tabName) {
+                    btn.classList.add('active', 'text-ton-glow', 'bg-ton/15');
+                    btn.classList.remove('text-slate-400');
+                } else {
+                    btn.classList.remove('active', 'text-ton-glow', 'bg-ton/15');
+                    btn.classList.add('text-slate-400');
+                }
+            });
+            refreshUI();
+        }
+
+        function getMiningMetrics() {
+            let totalHash = 125, yieldPerSec = 0.000005, highestTier = 1;
+            HARDWARE_CATALOG.forEach(item => {
+                const lvl = state.hardwareLevels[item.id] || 0;
+                if (lvl > 0) {
+                    totalHash += item.baseHash * lvl;
+                    yieldPerSec += item.baseYieldPerSec * lvl;
+                    if (item.tier > highestTier) highestTier = item.tier;
+                }
+            });
+            return { totalHash, yieldPerSec, dailyYield: yieldPerSec * 86400, highestTier, tapReward: Math.max(0.00015, yieldPerSec * 18) };
+        }
+
+        function handleReactorTap(event) {
+            if (state.isOverheated) return;
+            const metrics = getMiningMetrics();
+            state.unclaimed += metrics.tapReward;
+            state.heat = Math.min(100, state.heat + 7);
+            if (state.heat >= 100) {
+                state.isOverheated = true;
+                state.cooldownRemaining = 10;
+                showToast('⚠️ Termal Limit! 10 sn soğutma.', 'warning');
+            }
+            updateMiningDOM();
+        }
+
+        function claimMinedTokens() {
+            if (state.unclaimed < 0.0001) return showToast('Yetersiz bakiye.', 'warning');
+            state.balance += state.unclaimed;
+            state.unclaimed = 0;
+            showToast('Cüzdana aktarıldı!', 'success');
+            saveState();
+            refreshUI();
+        }
+
+        function renderHardwareList() {
+            const container = document.getElementById('hardware-list');
+            container.innerHTML = HARDWARE_CATALOG.map(item => {
+                const lvl = state.hardwareLevels[item.id] || 0;
+                const cost = (item.baseCost * Math.pow(item.costMultiplier, lvl)).toFixed(2);
+                return `<div class="glass-card p-4 rounded-3xl flex justify-between items-center">
+                    <div><h3 class="text-sm font-bold text-white">${item.name}</h3><p class="text-[11px] text-slate-400">Seviye: ${lvl}</p></div>
+                    <button onclick="upgradeHardware('${item.id}', ${cost})" class="px-3 py-2 bg-gold text-slate-950 font-bold text-xs rounded-xl">Yükselt • ${cost} TON</button>
+                </div>`;
+            }).join('');
+        }
+
+        function upgradeHardware(id, cost) {
+            if (state.balance < cost) return showToast('Yetersiz bakiye!', 'error');
+            state.balance -= cost;
+            state.hardwareLevels[id] = (state.hardwareLevels[id] || 0) + 1;
+            showToast('Yükseltildi!', 'success');
+            saveState();
+            refreshUI();
+        }
+
+        function selectDepositPreset(val) { document.getElementById('deposit-amount-input').value = val; }
+        function simulateBlockchainDeposit() {
+            const val = parseFloat(document.getElementById('deposit-amount-input').value) || 1;
+            state.balance += val;
+            showToast(`${val} TON eklendi!`, 'success');
+            saveState();
+            refreshUI();
+        }
+
+        function updateWithdrawConditionsUI() {
+            const metrics = getMiningMetrics();
+            const hasBal = state.balance >= 15;
+            const hasHw = metrics.highestTier >= 2;
+            const hasRef = state.referrals.length >= 3;
+            document.getElementById('withdraw-progress-val').textContent = state.balance.toFixed(4);
+            document.getElementById('withdraw-progress-bar').style.width = `${Math.min(100, (state.balance/15)*100)}%`;
+            document.getElementById('cond-balance').innerHTML = `<span>1. Min 15 TON Bakiye</span><span class="${hasBal?'text-emerald-400':'text-rose-400'}">${hasBal?'Tamam':'Eksik'}</span>`;
+            document.getElementById('cond-hardware').innerHTML = `<span>2. Tier 2+ Donanım</span><span class="${hasHw?'text-emerald-400':'text-rose-400'}">${hasHw?'Tamam':'Tier 1'}</span>`;
+            document.getElementById('cond-referrals').innerHTML = `<span>3. 3 Referans</span><span class="${hasRef?'text-emerald-400':'text-rose-400'}">${state.referrals.length}/3</span>`;
+        }
+
+        function processWithdrawal() {
+            const metrics = getMiningMetrics();
+            if (state.balance < 15 || metrics.highestTier < 2 || state.referrals.length < 3) {
+                return showToast('Çekim şartları henüz karşılanmadı!', 'error');
+            }
+            state.balance -= 15;
+            showToast('Çekim kuyruğa alındı!', 'success');
+            saveState();
+            refreshUI();
+        }
+
+        function toggleTonConnect() {
+            if (state.walletAddress) {
+                state.walletAddress = null;
+                showToast('Cüzdan bağlantısı kesildi.', 'info');
+            } else {
+                state.walletAddress = 'UQDr4x9K8mN2pQ7vL5wR9tY3zC6bV1nM8sF4hJ0kL2pD9wE4';
+                showToast('Tonkeeper cüzdanı bağlandı!', 'success');
+            }
+            saveState();
+            refreshUI();
+        }
+
+        function updateMiningDOM() {
+            const metrics = getMiningMetrics();
+            document.getElementById('header-balance').textContent = state.balance.toFixed(4);
+            document.getElementById('unclaimed-amount').textContent = state.unclaimed.toFixed(6);
+            document.getElementById('stat-hashrate').textContent = `${metrics.totalHash} H/s`;
+            document.getElementById('stat-daily-yield').textContent = `${metrics.dailyYield.toFixed(4)} TON`;
+            document.getElementById('thermal-bar').style.width = `${state.heat}%`;
+            document.getElementById('thermal-text').textContent = `${Math.round(34 + state.heat*0.6)}°C`;
+        }
+
+        function refreshUI() {
+            updateMiningDOM();
+            renderHardwareList();
+            updateWithdrawConditionsUI();
+            document.getElementById('ref-count-header').textContent = state.referrals.length;
+            const walletStatus = document.getElementById('connected-wallet-status');
+            const walletBtn = document.getElementById('btn-ton-connect');
+            if (state.walletAddress) {
+                walletStatus.textContent = 'Bağlandı (UQ...)';
+                walletBtn.textContent = 'Bağlantıyı Kes';
+            } else {
+                walletStatus.textContent = 'Bağlı Cüzdan Yok';
+                walletBtn.textContent = 'Cüzdan Bağla';
+            }
+        }
+
+        setInterval(() => {
+            const metrics = getMiningMetrics();
+            state.unclaimed += metrics.yieldPerSec * 0.1;
+            if (state.isOverheated) {
+                state.cooldownRemaining -= 0.1;
+                state.heat = Math.max(0, (state.cooldownRemaining / 10) * 100);
+                if (state.cooldownRemaining <= 0) state.isOverheated = false;
+            } else if (state.heat > 0) {
+                state.heat = Math.max(0, state.heat - 1.5);
+            }
+            updateMiningDOM();
+        }, 100);
+
+        window.onload = () => { refreshUI(); };
+    </script>
+</body>
+</html>
