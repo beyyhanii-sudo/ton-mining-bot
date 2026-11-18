@@ -4,7 +4,7 @@ from aiogram import Bot, Dispatcher, types
 from aiogram.filters import CommandStart
 from aiogram.types import WebAppInfo, InlineKeyboardMarkup, InlineKeyboardButton
 
-BOT_TOKEN = os.getenv(9015244243:AAFIwANFKYG5IJs52ZjKCwAJ0Hf9m0HO9AU)
+BOT_TOKEN = os.getenv("9015244243:AAFIwANFKYG5IJs52ZjKCwAJ0Hf9m0HO9AU")
 import os
 import asyncio
 from aiogram import Bot, Dispatcher, types
